@@ -1,0 +1,3 @@
+[submodule "submodules/GlobalCorrelator_HLS"]
+	path = submodules/GlobalCorrelator_HLS
+	url = git@github.com:p2l1pfp/GlobalCorrelator_HLS.git
