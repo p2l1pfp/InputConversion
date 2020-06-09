@@ -8,7 +8,11 @@ set topFunc ${mainAlgo}_hw
 open_project -reset "track-conv-test"
 set_top ${topFunc}
 add_files src/wrapper.cpp 
-#-cflags "-DHLS_pipeline_II=1"
+# add_files ../submodules/GlobalCorrelator_HLS/tmux_create_test.h
+# add_files ../submodules/GlobalCorrelator_HLS/firmware/data.h
+#add_files ../submodules/GTT_MET_HLS/submodules/common/DataFormats/interface/Track.h
+add_files ../submodules/GTT_MET_HLS/eta/src/eta_top.cc
+add_files ../submodules/GTT_MET_HLS/p_T/src/p_T_top.cc
 add_files -tb test.cpp
 
 # reset the solution
