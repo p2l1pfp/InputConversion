@@ -1,3 +1,6 @@
 [submodule "submodules/GlobalCorrelator_HLS"]
 	path = submodules/GlobalCorrelator_HLS
 	url = git@github.com:p2l1pfp/GlobalCorrelator_HLS.git
+[submodule "submodules/GTT_MET_HLS"]
+	path = submodules/GTT_MET_HLS
+	url = ssh://git@gitlab.cern.ch:7999/GTT/MET_HLS.git
