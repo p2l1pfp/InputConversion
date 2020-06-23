@@ -1,16 +1,21 @@
-#ifndef MET_H
-#define MET_H
+#ifndef WRAPPER_H
+#define WRAPPER_H
 
 #include <iostream>
 #include <cmath>
 #include "ap_int.h"
 #include "ap_fixed.h"
 
-//#include "../../submodules/GTT_MET_HLS/submodules/common/DataFormats/interface/Track.h"
+/* #include "types.h" */
+/* #include "convert_pt.h" */
 
-//#include "../../submodules/GlobalCorrelator_HLS/tmux_create_test.h"
-//from https://gitlab.cern.ch/GTT/common/-/blob/master/DataFormats/interface/Track.h
-//https://twiki.cern.ch/twiki/bin/viewauth/CMS/HybridDataFormat#Fitted_Tracks_written_by_KalmanF
+typedef ap_uint<96> input_t;
+typedef ap_uint<64> output_t;
+
+void pf_input_track_conv_hw(input_t in, output_t& out);
+
+
+
 enum TrackBitWidths { 
 //MSB
     kValid              = 1,                                    // Valid bit
@@ -69,38 +74,65 @@ typedef ap_fixed<kPtSize+kChargeSize,0, AP_RND_CONV, AP_SAT>        rinv_t;     
 
 //#include "../../submodules/GlobalCorrelator_HLS/firmware/data.h"
 typedef ap_int<16> pt_t;
-typedef ap_int<10>  etaphi_t;
+typedef ap_int<10> etaphi_t;
 typedef ap_int<5>  vtx_t;
-typedef ap_uint<3>  particleid_t;
+typedef ap_uint<3> particleid_t;
 typedef ap_int<10> z0_t;
+//float PF_PT_SCALE = 4.0;
 
-typedef ap_uint<96> input_t;
-typedef ap_uint<64> output_t;
+void pack_L1T_track(ap_uint<kTrackWordSize> &tk,
+                    rinv_t     rinv    ,
+                    tkphi_t    tkphi   ,
+                    tanlam_t   tanlam  ,
+                    tkz0_t     tkz0    ,
+                    tkd0_t     tkd0    ,
+                    chi2rphi_t chi2rphi,
+                    chi2rz_t   chi2rz  ,
+                    bendChi2_t bendChi2,
+                    hit_t      hit     ,
+                    trackMVA_t trackMVA,
+                    extraMVA_t extraMVA,
+                    valid_t    valid   ); 
 
-void pf_input_track_conv_hw(input_t in, output_t& out);
+void unpack_L1T_track(ap_uint<kTrackWordSize> tk,
+                      rinv_t     &rinv    ,
+                      tkphi_t    &tkphi   ,
+                      tanlam_t   &tanlam  ,
+                      tkz0_t     &tkz0    ,
+                      tkd0_t     &tkd0    ,
+                      chi2rphi_t &chi2rphi,
+                      chi2rz_t   &chi2rz  ,
+                      bendChi2_t &bendChi2,
+                      hit_t      &hit     ,
+                      trackMVA_t &trackMVA,
+                      extraMVA_t &extraMVA,
+                      valid_t    &valid   );
 
-/* void unpack_track(input_t word, TkObj& tk){
-    uint lo=0;
-    tk.tkPt = word(lo,TrackBitWidths::kPtSize);
+void pack_pf_track(ap_uint<64> &tk,
+                   pt_t     pf_pt   ,
+                   pt_t     pf_pterr,
+                   etaphi_t pf_eta  ,
+                   etaphi_t pf_phi  ,
+                   z0_t     pf_z0   ,
+                   bool     pf_TightQuality);
 
-    tk.tkCharge;
-    tk.tkPhiFloat; // global angle (independent of sector)
-    tk.tkPhi; // relative to the sector center
-    tk.tkEta;
-    tk.tkZ0;
-    tk.tkD0;
+void unpack_pf_track(ap_uint<64> tk,
+                     pt_t     &pf_pt   ,
+                     pt_t     &pf_pterr,
+                     etaphi_t &pf_eta  ,
+                     etaphi_t &pf_phi  ,
+                     z0_t     &pf_z0   ,
+                     bool     &pf_TightQuality);
 
-    // Track quality
-    tk.tkChi2rphi;
-    tk.tkChi2rz;
-    tk.tkBendChi2;
-    tk.tkHitPattern;
-    tk.tkMVA;
-    tk.tkMVASpecialized;
+template<class in_t, class out_t> void bit_copy(in_t in, out_t &out, int offset=0);
 
-    // Track valid bit
-    tk.tkValid;
-}
-*/
+#define PT_INV_TAB_SIZE 8
+#define PT_MAX 10
+// both in bits, at most kPtSize
+
+template<class pt_inv_T, class pt_T> void init_pt_inv_table(pt_T table_out[(1<<PT_INV_TAB_SIZE)]);
+
+template<class pt_inv_T, class pt_T> void convert_pt(pt_inv_T inv, pt_T &pt);
+
 
 #endif
