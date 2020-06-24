@@ -4,8 +4,9 @@
 
 int main(){
 
-    unsigned int ntest=3;
+    unsigned int ntest=30;
     bool debugTracks=false;
+    bool debugPF=false;
 
     // L1T tk parts for testing
     rinv_t     rinv     = 0.5;
@@ -22,12 +23,20 @@ int main(){
     valid_t    valid    = 1;
 
     // PF tk parts for testing
-    pt_t pf_pt;
-    pt_t pf_pterr;
-    etaphi_t pf_eta;
-    etaphi_t pf_phi;
-    z0_t pf_z0;
-    bool pf_TightQuality;
+    // pt_t pf_pt;
+    // pt_t pf_pterr;
+    // etaphi_t pf_eta;
+    // etaphi_t pf_phi;
+    // z0_t pf_z0;
+    // bool pf_TightQuality;
+
+    pt_t pf_pt = 20;
+    pt_t pf_pterr = 22;
+    etaphi_t pf_eta = -12;
+    etaphi_t pf_phi = 14;
+    z0_t pf_z0 = -3;
+    bool pf_TightQuality = true;
+
 
     for(unsigned long itest=0; itest<ntest; itest++){
 
@@ -56,10 +65,36 @@ int main(){
 
         pf_input_track_conv_hw(in_tk, out_tk);
 
-        unpack_pf_track(out_tk, pf_pt, pf_pterr, pf_eta, pf_phi, pf_z0, pf_TightQuality);
+        //unpack_pf_track(out_tk, pf_pt, pf_pterr, pf_eta, pf_phi, pf_z0, pf_TightQuality);
+
+        pf_pt = 2+itest;
+        ap_uint<64> tk;
+        pack_pf_track(tk, pf_pt, pf_pterr, pf_eta, pf_phi, pf_z0, pf_TightQuality);
+        if(debugPF){
+            std::cout << "TB before:" << std::endl;
+            std::cout<<"pf_pt    "; for(int i=pt_t    ::width-1; i>=0;i--){ std::cout << int(pf_pt   [i]);}std::cout << "  " << pf_pt   .to_double() << std::endl;
+            std::cout<<"pf_pterr "; for(int i=pt_t    ::width-1; i>=0;i--){ std::cout << int(pf_pterr[i]);}std::cout << "  " << pf_pterr.to_double() << std::endl;
+            std::cout<<"pf_eta   "; for(int i=etaphi_t::width-1; i>=0;i--){ std::cout << int(pf_eta  [i]);}std::cout << "  " << pf_eta  .to_double() << std::endl;
+            std::cout<<"pf_phi   "; for(int i=etaphi_t::width-1; i>=0;i--){ std::cout << int(pf_phi  [i]);}std::cout << "  " << pf_phi  .to_double() << std::endl;
+            std::cout<<"pf_z0    "; for(int i=z0_t    ::width-1; i>=0;i--){ std::cout << int(pf_z0   [i]);}std::cout << "  " << pf_z0   .to_double() << std::endl; 
+            std::cout<<"pf_TightQuality    " << pf_TightQuality << std::endl;
+            std::cout<<"tk       "; for(int i=ap_uint<64>::width-1; i>=0;i--){ std::cout << int(tk   [i]);}std::cout << std::endl;
+        }
+        unpack_pf_track(tk, pf_pt, pf_pterr, pf_eta, pf_phi, pf_z0, pf_TightQuality);
+        if(debugPF){
+            std::cout << "TB after:" << std::endl;
+            std::cout<<"pf_pt    "; for(int i=pt_t    ::width-1; i>=0;i--){ std::cout << int(pf_pt   [i]);}std::cout << "  " << pf_pt   .to_double() << std::endl;
+            std::cout<<"pf_pterr "; for(int i=pt_t    ::width-1; i>=0;i--){ std::cout << int(pf_pterr[i]);}std::cout << "  " << pf_pterr.to_double() << std::endl;
+            std::cout<<"pf_eta   "; for(int i=etaphi_t::width-1; i>=0;i--){ std::cout << int(pf_eta  [i]);}std::cout << "  " << pf_eta  .to_double() << std::endl;
+            std::cout<<"pf_phi   "; for(int i=etaphi_t::width-1; i>=0;i--){ std::cout << int(pf_phi  [i]);}std::cout << "  " << pf_phi  .to_double() << std::endl;
+            std::cout<<"pf_z0    "; for(int i=z0_t    ::width-1; i>=0;i--){ std::cout << int(pf_z0   [i]);}std::cout << "  " << pf_z0   .to_double() << std::endl; 
+            std::cout<<"pf_TightQuality    " << pf_TightQuality << std::endl;
+            std::cout<<"tk       "; for(int i=ap_uint<64>::width-1; i>=0;i--){ std::cout << int(tk   [i]);}std::cout << std::endl;
+        }
+
 
         //std::cout << "End \n" << std::endl;
-        std::cout << "TB: " << rinv.to_double() << " versus " << pf_pt.to_double() << std::endl;
+        std::cout << "TB: " << 1./rinv.to_double() << " versus " << pf_pt.to_double() << std::endl;
 
     }
 

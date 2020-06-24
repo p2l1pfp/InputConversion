@@ -9,6 +9,9 @@
 /* #include "types.h" */
 /* #include "convert_pt.h" */
 
+#define PT_INV_TAB_SIZE 8
+#define PT_INV_MAX_BITS 8
+
 typedef ap_uint<96> input_t;
 typedef ap_uint<64> output_t;
 
@@ -70,15 +73,16 @@ typedef ap_fixed<kPhiSize, kPhiMagSize, AP_RND_CONV, AP_SAT>        tkphi_t;    
 typedef bool                                                        q_t;              // Charge of track PT
 typedef ap_ufixed<kPtSize, kPtMagSize, AP_RND_CONV, AP_SAT>         tkpt_t;           // Track PT
 typedef ap_fixed<kPtSize+kChargeSize,0, AP_RND_CONV, AP_SAT>        rinv_t;           // 1/RT
+typedef ap_ufixed<kPtSize,0, AP_RND_CONV, AP_SAT>                   urinv_t;           // 1/RT unsigned
 
 
 //#include "../../submodules/GlobalCorrelator_HLS/firmware/data.h"
+#define PF_PT_SCALE (4.0)
 typedef ap_int<16> pt_t;
 typedef ap_int<10> etaphi_t;
 typedef ap_int<5>  vtx_t;
 typedef ap_uint<3> particleid_t;
 typedef ap_int<10> z0_t;
-//float PF_PT_SCALE = 4.0;
 
 void pack_L1T_track(ap_uint<kTrackWordSize> &tk,
                     rinv_t     rinv    ,
