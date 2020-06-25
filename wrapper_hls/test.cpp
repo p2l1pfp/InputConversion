@@ -41,15 +41,15 @@ int main(){
         output_t out_tk(0);
         rinv = 1./(itest+2); // pt = 2,3,4,...
         tanlam = 7 * float(itest)/ntest * (itest%2 ? 1:-1); // pt = 7*(0.1,-0.2,0.3,... )
-        cout << "testing tanlam = " << tanlam << endl;
 
         pack_L1T_track(in_tk, rinv, tkphi, tanlam, tkz0, tkd0, chi2rphi, chi2rz, bendChi2, hit, trackMVA, extraMVA, valid);
         pf_input_track_conv_hw(in_tk, out_tk);
         unpack_pf_track(out_tk, pf_pt, pf_pterr, pf_eta, pf_phi, pf_z0, pf_TightQuality);
 
+        // std::cout << "pT: TB (" << rinv.to_double() << ") versus HW (" << pf_pt.to_double << ")" << std::endl;
         // std::cout << "pT: TB (" << 1./rinv.to_double() << ") versus HW (" << pf_pt.to_double()/PF_PT_SCALE << ")" << std::endl;
-        std::cout << "eta: TB (" << tanlam.to_double() << ") versus HW (" << pf_eta.to_double() << ")" << std::endl;
-        std::cout << "eta: TB (" << tanlam_to_eta(tanlam.to_double()) << ") versus HW (" << pf_eta.to_double()/PF_ETAPHI_SCALE << ")" << std::endl;
+        // std::cout << "eta: TB (" << tanlam.to_double() << ") versus HW (" << pf_eta.to_double() << ")" << std::endl;
+        // std::cout << "eta: TB (" << tanlam_to_eta(tanlam.to_double()) << ") versus HW (" << pf_eta.to_double()/PF_ETAPHI_SCALE << ")" << std::endl;
     }
     return 0;
 }

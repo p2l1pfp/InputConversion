@@ -222,7 +222,6 @@ void init_eta_table(eta_T table_out[(1<<ETA_TAB_SIZE)]) {
         table_out[i] = eta * PF_ETAPHI_SCALE;
         // phi in -511,512 can only hold eta up to 2.23. else saturate for now
         if (eta * PF_ETAPHI_SCALE > (1<<(eta_T::width-1))-1) table_out[i] = (1<<(eta_T::width-1))-1;
-        //cout << "ETA table: " << i << " " << tanlam << " " << eta << " " << table_out[i] << endl;
     }
     return;
 }
@@ -245,24 +244,18 @@ void convert_eta(tanlam_T tanlam, eta_T &eta){
         initialized = true;
     }
     bool flip = false;
-    //cout << "\ntanlam " << tanlam << endl;
     if(tanlam<0){
         tanlam = -tanlam;
         flip=true;
     }
     utanlam_t utanlam = tanlam;
-    //cout << "utanlam " << utanlam << endl;
-    //for(int i=utanlam_t::width-1; i>=0;i--){std::cout << int(utanlam[i]);} std::cout << std::endl;
 
     ap_uint<ETA_TAB_SIZE> index;
     #pragma unroll
     for(int i=0; i<ETA_TAB_SIZE; i++){
         index[ETA_TAB_SIZE-1-i] = utanlam[utanlam_t::width-1-i]; //msb down to lowest
     }
-    //cout << "index " << index << endl;
-    //for(int i=ETA_TAB_SIZE-1; i>=0;i--){std::cout << int(index[i]);} std::cout << std::endl;
 
     eta = eta_table[index];
     if(flip) eta = -eta;
-    //cout << "eta " << eta << endl;
 }
