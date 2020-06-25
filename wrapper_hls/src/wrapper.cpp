@@ -31,14 +31,17 @@ void pf_input_track_conv_hw(input_t in, output_t& out){
     unpack_L1T_track(in, rinv, tkphi, tanlam, tkz0, tkd0, chi2rphi, chi2rz, bendChi2, hit, trackMVA, extraMVA, valid);
 
     // selection
-    //if(!valid) return;
+    if(!valid){
+        out=0;
+        return;
+    }
 
     // converters
     pt_t conv_pt;
     convert_pt(rinv,conv_pt);
 
-    // etaphi_t conv_eta;
-    // convert_eta(tanlam,conv_eta);
+    etaphi_t conv_eta;
+    convert_eta(tanlam,conv_eta);
 
     // in_pt_t conv_in_pt = rinv;
     // out_pt_t conv_out_pt;
@@ -53,14 +56,13 @@ void pf_input_track_conv_hw(input_t in, output_t& out){
 
     // pack in PF format
     pt_t pf_pt = conv_pt;
-    pt_t pf_pterr = conv_pt;
-    etaphi_t pf_eta = 0; //conv_out_eta;
-    etaphi_t pf_phi = tkphi;
-    z0_t pf_z0 = tkz0;
+    pt_t pf_pterr = conv_pt; // TODO
+    etaphi_t pf_eta = conv_eta;
+    etaphi_t pf_phi = bigfix_t(tkphi)*bigfix_t(PF_ETAPHI_SCALE);
+    z0_t pf_z0 = bigfix_t(tkz0)*bigfix_t(PF_Z0_SCALE);
     bool pf_TightQuality = 1;
     pack_pf_track(out, pf_pt, pf_pterr, pf_eta, pf_phi, pf_z0, pf_TightQuality);
 }
-
 
 void pack_L1T_track(ap_uint<kTrackWordSize> &tk,
                     rinv_t     rinv    ,
@@ -158,7 +160,7 @@ void bit_copy(in_t in, out_t &out, int offset=0){
 
 template<class pt_inv_T, class pt_T>
 void init_pt_inv_table(pt_T table_out[(1<<PT_INV_TAB_SIZE)]) {
-    // index is a uint from 0 to 111...11=2^PT_INV_MAX_BITS-1 that encodes 0.000 to 0.4999999
+    // index is a uint from 0 to 111...11=2^PT_INV_TAB_SIZE-1 that encodes 0.000 to 0.4999999
     // resulting value pt_T is a uint from 0 to 2^16-1
     table_out[0] = (1<<PT_INV_MAX_BITS);
     for (unsigned int i = 1; i < (1<<PT_INV_TAB_SIZE); i++) {
@@ -206,4 +208,61 @@ void convert_pt(pt_inv_T inv, pt_T &pt){
     }
 
     pt = inv_table[index];
+}
+
+template<class eta_T>
+void init_eta_table(eta_T table_out[(1<<ETA_TAB_SIZE)]) {
+    // index is a uint from 0 to 111...11=2^ETA_TAB_SIZE-1 that encodes 0.000 to 8
+    // resulting value eta_T is a uint
+
+    for (unsigned int i = 0; i < (1<<ETA_TAB_SIZE); i++) {
+        // eta =  -ln(tan((pi/2 - arctan(TANLAM))/2))
+        float tanlam = float(i)/(1<<ETA_TAB_SIZE) * 8.;
+        float eta = -log(tan((M_PI/2 - atan(tanlam))/2));
+        table_out[i] = eta * PF_ETAPHI_SCALE;
+        // phi in -511,512 can only hold eta up to 2.23. else saturate for now
+        if (eta * PF_ETAPHI_SCALE > (1<<(eta_T::width-1))-1) table_out[i] = (1<<(eta_T::width-1))-1;
+        //cout << "ETA table: " << i << " " << tanlam << " " << eta << " " << table_out[i] << endl;
+    }
+    return;
+}
+
+template<class tanlam_T, class eta_T>
+void convert_eta(tanlam_T tanlam, eta_T &eta){
+    // tanlam_T is ap_fixed<16,3>
+    // eta_T is ap_int<10>
+
+    // Initialize the lookup tables
+#ifdef __HLS_SYN__
+    bool initialized = false;
+    etaphi_t eta_table[(1<<ETA_TAB_SIZE)];
+#else 
+    static bool initialized = false;
+    static etaphi_t eta_table[(1<<ETA_TAB_SIZE)];
+#endif
+    if (!initialized) {
+        init_eta_table<eta_T>(eta_table);
+        initialized = true;
+    }
+    bool flip = false;
+    //cout << "\ntanlam " << tanlam << endl;
+    if(tanlam<0){
+        tanlam = -tanlam;
+        flip=true;
+    }
+    utanlam_t utanlam = tanlam;
+    //cout << "utanlam " << utanlam << endl;
+    //for(int i=utanlam_t::width-1; i>=0;i--){std::cout << int(utanlam[i]);} std::cout << std::endl;
+
+    ap_uint<ETA_TAB_SIZE> index;
+    #pragma unroll
+    for(int i=0; i<ETA_TAB_SIZE; i++){
+        index[ETA_TAB_SIZE-1-i] = utanlam[utanlam_t::width-1-i]; //msb down to lowest
+    }
+    //cout << "index " << index << endl;
+    //for(int i=ETA_TAB_SIZE-1; i>=0;i--){std::cout << int(index[i]);} std::cout << std::endl;
+
+    eta = eta_table[index];
+    if(flip) eta = -eta;
+    //cout << "eta " << eta << endl;
 }
