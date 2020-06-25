@@ -8,14 +8,11 @@ using std::cout;
 using std::endl;
 #endif
 
-
 // #include "../../submodules/GTT_MET_HLS/eta/src/eta_top.cc"
 // #include "../../submodules/GTT_MET_HLS/p_T/src/p_T_top.cc"
 
 void pf_input_track_conv_hw(input_t in, output_t& out){
     #pragma HLS pipeline II=1
-
-    bool debugTracks=false;
 
     // unpack L1Track format
     rinv_t     rinv    ;
@@ -33,34 +30,15 @@ void pf_input_track_conv_hw(input_t in, output_t& out){
 
     unpack_L1T_track(in, rinv, tkphi, tanlam, tkz0, tkd0, chi2rphi, chi2rz, bendChi2, hit, trackMVA, extraMVA, valid);
 
-    if(debugTracks){
-        std::cout << "---------- " << std::endl;
-        std::cout << "Algo reads " << std::endl;
-        std::cout<<"rinv     "; for(int i=rinv_t    ::width-1; i>=0;i--){ std::cout << int( rinv    [i]);}std::cout << "  " << rinv    .to_double() << std::endl;
-        std::cout<<"tkphi    "; for(int i=tkphi_t   ::width-1; i>=0;i--){ std::cout << int( tkphi   [i]);}std::cout << "  " << tkphi   .to_double() << std::endl;
-        std::cout<<"tanlam   "; for(int i=tanlam_t  ::width-1; i>=0;i--){ std::cout << int( tanlam  [i]);}std::cout << "  " << tanlam  .to_double() << std::endl;
-        std::cout<<"tkz0     "; for(int i=tkz0_t    ::width-1; i>=0;i--){ std::cout << int( tkz0    [i]);}std::cout << "  " << tkz0    .to_double() << std::endl;
-        std::cout<<"tkd0     "; for(int i=tkd0_t    ::width-1; i>=0;i--){ std::cout << int( tkd0    [i]);}std::cout << "  " << tkd0    .to_double() << std::endl;
-        std::cout<<"chi2rphi "; for(int i=chi2rphi_t::width-1; i>=0;i--){ std::cout << int( chi2rphi[i]);}std::cout << "  " << chi2rphi.to_double() << std::endl;
-        std::cout<<"chi2rz   "; for(int i=chi2rz_t  ::width-1; i>=0;i--){ std::cout << int( chi2rz  [i]);}std::cout << "  " << chi2rz  .to_double() << std::endl;
-        std::cout<<"bendChi2 "; for(int i=bendChi2_t::width-1; i>=0;i--){ std::cout << int( bendChi2[i]);}std::cout << "  " << bendChi2.to_double() << std::endl;
-        std::cout<<"hit      "; for(int i=hit_t     ::width-1; i>=0;i--){ std::cout << int( hit     [i]);}std::cout << "  " << hit     .to_double() << std::endl;
-        std::cout<<"trackMVA "; for(int i=trackMVA_t::width-1; i>=0;i--){ std::cout << int( trackMVA[i]);}std::cout << "  " << trackMVA.to_double() << std::endl;
-        std::cout<<"extraMVA "; for(int i=extraMVA_t::width-1; i>=0;i--){ std::cout << int( extraMVA[i]);}std::cout << "  " << extraMVA.to_double() << std::endl;
-        std::cout<<"valid    "; for(int i=valid_t   ::width-1; i>=0;i--){ std::cout << int( valid   [i]);}std::cout << "  " << valid   .to_double() << std::endl;
-    }
-
-    // std::cout << "valid " << valid << std::endl;
-
-
     // selection
     //if(!valid) return;
 
     // converters
     pt_t conv_pt;
-    //std::cout << "BEGIN conversion" << std::endl;
     convert_pt(rinv,conv_pt);
-    //std::cout << "END conversion" << std::endl;
+
+    // etaphi_t conv_eta;
+    // convert_eta(tanlam,conv_eta);
 
     // in_pt_t conv_in_pt = rinv;
     // out_pt_t conv_out_pt;
@@ -98,22 +76,6 @@ void pack_L1T_track(ap_uint<kTrackWordSize> &tk,
                     extraMVA_t extraMVA,
                     valid_t    valid   ){
 
-    bool debug=false;
-    if(debug){
-        std::cout << "Packing obj content: " << std::endl;
-        std::cout<<"rinv     "; for(int i=rinv_t    ::width-1; i>=0;i--){ std::cout << int( rinv    [i]);}std::cout << std::endl;
-        std::cout<<"tkphi    "; for(int i=tkphi_t   ::width-1; i>=0;i--){ std::cout << int( tkphi   [i]);}std::cout << std::endl;
-        std::cout<<"tanlam   "; for(int i=tanlam_t  ::width-1; i>=0;i--){ std::cout << int( tanlam  [i]);}std::cout << std::endl;
-        std::cout<<"tkz0     "; for(int i=tkz0_t    ::width-1; i>=0;i--){ std::cout << int( tkz0    [i]);}std::cout << std::endl;
-        std::cout<<"tkd0     "; for(int i=tkd0_t    ::width-1; i>=0;i--){ std::cout << int( tkd0    [i]);}std::cout << std::endl;
-        std::cout<<"chi2rphi "; for(int i=chi2rphi_t::width-1; i>=0;i--){ std::cout << int( chi2rphi[i]);}std::cout << std::endl;
-        std::cout<<"chi2rz   "; for(int i=chi2rz_t  ::width-1; i>=0;i--){ std::cout << int( chi2rz  [i]);}std::cout << std::endl;
-        std::cout<<"bendChi2 "; for(int i=bendChi2_t::width-1; i>=0;i--){ std::cout << int( bendChi2[i]);}std::cout << std::endl;
-        std::cout<<"hit      "; for(int i=hit_t     ::width-1; i>=0;i--){ std::cout << int( hit     [i]);}std::cout << std::endl;
-        std::cout<<"trackMVA "; for(int i=trackMVA_t::width-1; i>=0;i--){ std::cout << int( trackMVA[i]);}std::cout << std::endl;
-        std::cout<<"extraMVA "; for(int i=extraMVA_t::width-1; i>=0;i--){ std::cout << int( extraMVA[i]);}std::cout << std::endl;
-        std::cout<<"valid    "; for(int i=valid_t   ::width-1; i>=0;i--){ std::cout << int( valid   [i]);}std::cout << std::endl;
-    }
     ap_uint<rinv_t    ::width> word_rinv      = rinv    .range(rinv_t    ::width-1,0);
     ap_uint<tkphi_t   ::width> word_tkphi     = tkphi   .range(tkphi_t   ::width-1,0);
     ap_uint<tanlam_t  ::width> word_tanlam    = tanlam  .range(tanlam_t  ::width-1,0);
@@ -127,30 +89,8 @@ void pack_L1T_track(ap_uint<kTrackWordSize> &tk,
     ap_uint<extraMVA_t::width> word_extraMVA  = extraMVA.range(extraMVA_t::width-1,0);
     ap_uint<valid_t   ::width> word_valid     = valid   .range(valid_t   ::width-1,0);
 
-
-    if(debug){
-        std::cout << "Packing words: " << std::endl;
-        std::cout<<"rinv     "; for(int i=rinv_t    ::width-1; i>=0;i--){ std::cout << int( word_rinv    [i]);}std::cout << std::endl;
-        std::cout<<"tkphi    "; for(int i=tkphi_t   ::width-1; i>=0;i--){ std::cout << int( word_tkphi   [i]);}std::cout << std::endl;
-        std::cout<<"tanlam   "; for(int i=tanlam_t  ::width-1; i>=0;i--){ std::cout << int( word_tanlam  [i]);}std::cout << std::endl;
-        std::cout<<"tkz0     "; for(int i=tkz0_t    ::width-1; i>=0;i--){ std::cout << int( word_tkz0    [i]);}std::cout << std::endl;
-        std::cout<<"tkd0     "; for(int i=tkd0_t    ::width-1; i>=0;i--){ std::cout << int( word_tkd0    [i]);}std::cout << std::endl;
-        std::cout<<"chi2rphi "; for(int i=chi2rphi_t::width-1; i>=0;i--){ std::cout << int( word_chi2rphi[i]);}std::cout << std::endl;
-        std::cout<<"chi2rz   "; for(int i=chi2rz_t  ::width-1; i>=0;i--){ std::cout << int( word_chi2rz  [i]);}std::cout << std::endl;
-        std::cout<<"bendChi2 "; for(int i=bendChi2_t::width-1; i>=0;i--){ std::cout << int( word_bendChi2[i]);}std::cout << std::endl;
-        std::cout<<"hit      "; for(int i=hit_t     ::width-1; i>=0;i--){ std::cout << int( word_hit     [i]);}std::cout << std::endl;
-        std::cout<<"trackMVA "; for(int i=trackMVA_t::width-1; i>=0;i--){ std::cout << int( word_trackMVA[i]);}std::cout << std::endl;
-        std::cout<<"extraMVA "; for(int i=extraMVA_t::width-1; i>=0;i--){ std::cout << int( word_extraMVA[i]);}std::cout << std::endl;
-        std::cout<<"valid    "; for(int i=valid_t   ::width-1; i>=0;i--){ std::cout << int( word_valid   [i]);}std::cout << std::endl;
-    }
-
-    tk = (word_valid, word_extraMVA, word_trackMVA, word_hit, word_bendChi2, word_chi2rz, word_chi2rphi, word_tkd0, word_tkz0, word_tanlam, word_tkphi, word_rinv);
-    
-    if(debug){
-        std::cout << "Packed word: ";
-        for(int i=kTrackWordSize-1; i>=0;i--) std::cout << int(tk.test(i));
-        std::cout << std::endl;
-    }
+    tk = (word_valid, word_extraMVA, word_trackMVA, word_hit, word_bendChi2, word_chi2rz, 
+          word_chi2rphi, word_tkd0, word_tkz0, word_tanlam, word_tkphi, word_rinv);    
 }
 
 void unpack_L1T_track(ap_uint<kTrackWordSize> in,
@@ -166,17 +106,8 @@ void unpack_L1T_track(ap_uint<kTrackWordSize> in,
                     trackMVA_t &trackMVA,
                     extraMVA_t &extraMVA,
                     valid_t    &valid   ){
-
-    bool debug=false;
-    if(debug){
-        std::cout << "Packed word: ";
-        for(int i=kTrackWordSize-1; i>=0;i--) std::cout << int(in.test(i));
-        std::cout << std::endl;
-    }
-
     unsigned int lo = 0;
     unsigned int len = 0;
-
     len=rinv_t    ::width; bit_copy(in, rinv    , lo); lo += len;
     len=tkphi_t   ::width; bit_copy(in, tkphi   , lo); lo += len;
     len=tanlam_t  ::width; bit_copy(in, tanlam  , lo); lo += len;
@@ -189,25 +120,7 @@ void unpack_L1T_track(ap_uint<kTrackWordSize> in,
     len=trackMVA_t::width; bit_copy(in, trackMVA, lo); lo += len;
     len=extraMVA_t::width; bit_copy(in, extraMVA, lo); lo += len;
     len=valid_t   ::width; bit_copy(in, valid   , lo); lo += len;
-
-    if(debug){
-        std::cout << "Unpacked obj content: " << std::endl;
-        std::cout<<"rinv     "; for(int i=rinv_t    ::width-1; i>=0;i--){ std::cout << int( rinv    [i]);}std::cout << std::endl;
-        std::cout<<"tkphi    "; for(int i=tkphi_t   ::width-1; i>=0;i--){ std::cout << int( tkphi   [i]);}std::cout << std::endl;
-        std::cout<<"tanlam   "; for(int i=tanlam_t  ::width-1; i>=0;i--){ std::cout << int( tanlam  [i]);}std::cout << std::endl;
-        std::cout<<"tkz0     "; for(int i=tkz0_t    ::width-1; i>=0;i--){ std::cout << int( tkz0    [i]);}std::cout << std::endl;
-        std::cout<<"tkd0     "; for(int i=tkd0_t    ::width-1; i>=0;i--){ std::cout << int( tkd0    [i]);}std::cout << std::endl;
-        std::cout<<"chi2rphi "; for(int i=chi2rphi_t::width-1; i>=0;i--){ std::cout << int( chi2rphi[i]);}std::cout << std::endl;
-        std::cout<<"chi2rz   "; for(int i=chi2rz_t  ::width-1; i>=0;i--){ std::cout << int( chi2rz  [i]);}std::cout << std::endl;
-        std::cout<<"bendChi2 "; for(int i=bendChi2_t::width-1; i>=0;i--){ std::cout << int( bendChi2[i]);}std::cout << std::endl;
-        std::cout<<"hit      "; for(int i=hit_t     ::width-1; i>=0;i--){ std::cout << int( hit     [i]);}std::cout << std::endl;
-        std::cout<<"trackMVA "; for(int i=trackMVA_t::width-1; i>=0;i--){ std::cout << int( trackMVA[i]);}std::cout << std::endl;
-        std::cout<<"extraMVA "; for(int i=extraMVA_t::width-1; i>=0;i--){ std::cout << int( extraMVA[i]);}std::cout << std::endl;
-        std::cout<<"valid    "; for(int i=valid_t   ::width-1; i>=0;i--){ std::cout << int( valid   [i]);}std::cout << std::endl;
-    }
-
 }
-
 
 void pack_pf_track(ap_uint<64> &tk,
                    pt_t     pf_pt   ,
@@ -216,7 +129,6 @@ void pack_pf_track(ap_uint<64> &tk,
                    etaphi_t pf_phi  ,
                    z0_t     pf_z0   ,
                    bool     pf_TightQuality){
-
     tk = (pf_TightQuality, pf_z0, pf_phi, pf_eta, pf_pterr, pf_pt);    
 }
 
@@ -227,17 +139,14 @@ void unpack_pf_track(ap_uint<64> in,
                    etaphi_t &pf_phi  ,
                    z0_t     &pf_z0   ,
                    bool     &pf_TightQuality){
-
     unsigned int lo = 0;
     unsigned int len = 0;
-
     len=pt_t    ::width; bit_copy(in, pf_pt          , lo); lo += len;
     len=pt_t    ::width; bit_copy(in, pf_pterr       , lo); lo += len;
     len=etaphi_t::width; bit_copy(in, pf_eta         , lo); lo += len;
     len=etaphi_t::width; bit_copy(in, pf_phi         , lo); lo += len;
     len=z0_t    ::width; bit_copy(in, pf_z0          , lo); lo += len;
     pf_TightQuality = in[lo];
-    
 }
 
 template<class in_t, class out_t> 
@@ -247,87 +156,14 @@ void bit_copy(in_t in, out_t &out, int offset=0){
     }    
 }
 
-// template<class pt_inv_T, class pt_T>
-// void init_pt_inv_table(pt_T table_out[(1<<PT_INV_TAB_SIZE)]) {
-
-//     // table indices are pt, shifted by (kPtSize-PT_INV_TAB_SIZE) bits
-//     // index = pt -> integer -> bit-shift
-//     //ap_uint<kPtSize> integer_pt
-
-//     ap_ufixed<(2*(pt_inv_T::width) - pt_inv_T::iwidth), pt_inv_T::width - pt_inv_T::iwidth, AP_RND_CONV, AP_SAT> inv_enlarged; // enlarged type to shift bits
-//     ap_ufixed<(pt_inv_T::width+1), pt_inv_T::width, AP_RND_CONV, AP_SAT> frac_factor = pow(2,(pt_inv_T::width-pt_inv_T::iwidth));
-    
-//     ap_uint<pt_T::width> i_shifted;
-
-//     // multiply result by 1=2^(PT-SIZE)
-//     table_out[0] = pt_T(0)-1;
-//     for (unsigned int i = 1; i < (1<<PT_INV_TAB_SIZE); i++) {
-//         i_shifted = i;
-//         i_shifted = i_shifted << (pt_T::width - PT_INV_TAB_SIZE);
-//         inv_enlarged = i_shifted;
-//         inv_enlarged = inv_enlarged / frac_factor; //pow(2,(pt_inv_T::width-pt_inv_T::iwidth));
-//         table_out[i] = round((1<<(pt_T::width)) * 1./inv_enlarged.to_double());
-//         // std::cout << i << " " << table_out[i] << std::endl;
-//     }
-//     return;
-// }
-
-// template<class pt_inv_T, class pt_T>
-// void convert_pt(pt_inv_T inv, pt_T &pt){
-//     //pt_inv_T is ap_fixed<> (signed)
-//     //pt_T is ap_ufixed<>  -->  ap_uint<> !
-//     // Initialize the lookup tables
-// #ifdef __HLS_SYN__
-//     bool initialized = false;
-//     pt_t inv_table[(1<<PT_INV_TAB_SIZE)];
-// #else 
-//     static bool initialized = false;
-//     static pt_t inv_table[(1<<PT_INV_TAB_SIZE)];
-// #endif
-//     if (!initialized) {
-//         init_pt_inv_table<pt_inv_T,pt_T>(inv_table);
-//         initialized = true;
-//     }
-
-//     //return;
-
-//     pt_inv_T abs_inv = inv;
-//     if(inv<0) abs_inv = -inv;
-//     //inv = inv>0 ? inv : -inv;
-
-//     // need larger type to accomodate shift (from frac to integer representation) w/o loss of precision
-//     ap_ufixed<(2*(pt_inv_T::width) - pt_inv_T::iwidth), pt_inv_T::width - pt_inv_T::iwidth, AP_RND_CONV, AP_SAT> inv_enlarged; // enlarged type to shift bits
-//     inv_enlarged = abs_inv;
-//     inv_enlarged = inv_enlarged << (pt_inv_T::width - pt_inv_T::iwidth);
-//     ap_uint<pt_inv_T::width> inv_as_uint = inv_enlarged;
-
-//     // index by the (PT_INV_TAB_SIZE) MSBs
-//     ap_uint<PT_INV_TAB_SIZE> index = inv_enlarged >> (pt_inv_T::width-PT_INV_TAB_SIZE);
-    
-//     std::cout << "converting inv " << inv
-//               << ", to abs " << abs_inv
-//               << ", to enlarged " << inv_enlarged
-//               << ", uint " << inv_as_uint
-//               << ", index " << index
-//               << std::endl;
-//     pt = inv_table[index];
-
-//     return;
-
-// }
-
 template<class pt_inv_T, class pt_T>
 void init_pt_inv_table(pt_T table_out[(1<<PT_INV_TAB_SIZE)]) {
-
     // index is a uint from 0 to 111...11=2^PT_INV_MAX_BITS-1 that encodes 0.000 to 0.4999999
     // resulting value pt_T is a uint from 0 to 2^16-1
-
-    // multiply result by 1=2^(PT-SIZE)
     table_out[0] = (1<<PT_INV_MAX_BITS);
     for (unsigned int i = 1; i < (1<<PT_INV_TAB_SIZE); i++) {
         float invpt = float(i)/(1<<PT_INV_TAB_SIZE) * 0.5; // in 1/GeV
         table_out[i] = PF_PT_SCALE / invpt;
-        //cout << "index: " << i << " \t " << invpt <<  " \t " << table_out[i] << endl;
     }
     return;
 }
@@ -335,7 +171,7 @@ void init_pt_inv_table(pt_T table_out[(1<<PT_INV_TAB_SIZE)]) {
 template<class pt_inv_T, class pt_T>
 void convert_pt(pt_inv_T inv, pt_T &pt){
     //pt_inv_T is ap_fixed<> (signed)
-    //pt_T is ap_ufixed<>  -->  ap_uint<> !
+    //pt_T is ap_uint<> !
 
     // Initialize the lookup tables
 #ifdef __HLS_SYN__
@@ -350,28 +186,17 @@ void convert_pt(pt_inv_T inv, pt_T &pt){
         initialized = true;
     }
 
-    //return;
-    // cout << "Converter:" << endl;
-    // cout <<"input pt is " << inv << endl;
-
     if(inv<0) inv = -inv;
     urinv_t uinv = inv;
 
-    // cout <<"uinv " << uinv << endl;
-
-    // cutoff at high and low pt
+    // cutoffs at high and low pt
     if(uinv >= urinv_t(0.5)){
         pt = 2. * PF_PT_SCALE;
-        // cout <<"EXIT: pt=MIN: " << pt << endl;
         return;
     } else if (uinv <= urinv_t(1./(1<<PT_INV_MAX_BITS))){
         pt=(1<<PT_INV_MAX_BITS) * PF_PT_SCALE;
-        // cout <<"EXIT: pt=MAX: " << pt << endl;
         return;
     }
-
-    // cout << "uinv: ";
-    // for(int i=urinv_t::width-1; i>=0;i--){ std::cout << int(uinv[i]);}std::cout << std::endl;
 
     ap_uint<PT_INV_TAB_SIZE> index;
     const int offset = 1; // ignore the first bit since 0b0.01111.. = 0.499.. is largest value
@@ -379,12 +204,6 @@ void convert_pt(pt_inv_T inv, pt_T &pt){
     for(int i=0; i<PT_INV_TAB_SIZE; i++){
         index[PT_INV_TAB_SIZE-1-i] = uinv[urinv_t::width-1-i-offset]; //msb down to lowest
     }
-    // cout <<"index is " << index << endl;
-
-    // cout << "index: ";
-    // for(int i=PT_INV_TAB_SIZE-1; i>=0;i--){ std::cout << int(index[i]);}std::cout << std::endl;
 
     pt = inv_table[index];
-    //cout <<"pt is " << pt << " in GeV: " << pt.to_double()/PF_PT_SCALE << endl;
-    
 }
